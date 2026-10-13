@@ -5,6 +5,7 @@
 *-key.json
 *credentials*.json
 service-account*.json
+starter.sh
 
 # Local data
 data/
