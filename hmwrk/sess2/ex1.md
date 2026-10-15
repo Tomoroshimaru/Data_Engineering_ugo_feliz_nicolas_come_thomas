@@ -1,4 +1,4 @@
-# Session 3 — Exercise 1: stand up your own bronze bucket
+# Session 2 — Exercise 1: stand up your own bronze bucket
 
 LUBERNE Féliz — project `data-engineering-i2`, bucket `gs://data-engineering-i2-feliz`
 (europe-west1, Standard), pandas 2.2.3, pyarrow 25.0.1.
