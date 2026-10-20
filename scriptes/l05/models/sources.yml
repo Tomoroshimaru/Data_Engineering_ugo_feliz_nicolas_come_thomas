@@ -1,0 +1,22 @@
+version: 2
+
+sources:
+  - name: marketplace
+    description: "The company's tables, loaded into BigQuery in lesson 4 (fallback CSV)."
+    database: data-engineering-i2
+    schema: l04_fl
+    tables:
+      - name: orders
+        identifier: orders
+        config:
+          freshness:
+            warn_after: {count: 12, period: hour}
+            error_after: {count: 24, period: hour}
+      - name: order_items
+        identifier: order_items_raw     # the raw lines, as exported: no order_date
+      - name: review
+        identifier: review
+      - name: product_reviews
+        identifier: product_reviews
+      - name: product
+        identifier: product

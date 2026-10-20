@@ -1,0 +1,24 @@
+# Tests kept exactly as generated; only the descriptions were added.
+version: 2
+
+models:
+  - name: fct_daily_demand_gen
+    description: "{{ doc('fct_daily_demand_gen') }}"
+    columns:
+      - name: p_id
+        description: "{{ doc('p_id') }}"
+        tests:
+          - not_null
+          - unique
+      - name: order_date
+        description: "{{ doc('order_date') }}"
+      - name: units_sold
+        description: "{{ doc('units') }}"
+        tests:
+          - not_null
+      - name: revenue
+        description: "{{ doc('revenue') }}"
+      - name: avg_rating
+        description: "{{ doc('avg_rating') }}"
+      - name: review_count
+        description: "{{ doc('n_reviews') }}"

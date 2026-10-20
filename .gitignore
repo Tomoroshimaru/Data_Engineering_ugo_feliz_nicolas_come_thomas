@@ -23,6 +23,9 @@ requirements.txt
 dbt/target/
 dbt/dbt_packages/
 dbt/logs/
+target/
+dbt_packages/
+logs/
 
 # Terraform (the .terraform.lock.hcl file is committed on purpose)
 .terraform/

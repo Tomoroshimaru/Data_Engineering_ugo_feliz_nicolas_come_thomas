@@ -1,0 +1,92 @@
+version: 2
+
+models:
+  - name: stg_orders
+    description: "{{ doc('stg_orders') }}"
+    columns:
+      - name: order_id
+        description: "{{ doc('order_id') }}"
+        data_tests:
+          - not_null
+          - unique
+      - name: buyer_id
+        description: "{{ doc('buyer_id') }}"
+        data_tests:
+          - not_null
+      - name: discount_id
+        description: "{{ doc('discount_id') }}"
+      - name: payment_id
+        description: "Identifier of the payment for the order."
+      - name: order_date
+        description: "Date the order was placed."
+        data_tests:
+          - not_null
+
+  - name: stg_order_items
+    description: "{{ doc('stg_order_items') }}"
+    columns:
+      - name: order_id
+        description: "{{ doc('order_id') }}"
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_orders')
+                field: order_id
+      - name: p_id
+        description: "{{ doc('p_id') }}"
+        data_tests:
+          - not_null
+      - name: qty
+        description: "Number of units of the product in the order."
+        data_tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 1
+      - name: price_at_purchase
+        description: "Unit price paid, at the time of the order."
+        data_tests:
+          - not_null
+
+  - name: stg_review
+    description: "{{ doc('stg_review') }}"
+    columns:
+      - name: review_id
+        description: "{{ doc('review_id') }}"
+        data_tests:
+          - not_null
+          - unique
+      - name: buyer_id
+        description: "{{ doc('buyer_id') }}"
+      - name: r_desc
+        description: "Text of the review. NULL when the reviewer wrote nothing."
+      - name: title
+        description: "Title of the review."
+      - name: rating
+        description: "{{ doc('rating') }}"
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [1, 2, 3, 4, 5]
+                quote: false
+      - name: seller_product_flag
+        description: "Always 'S' in the current export."
+
+  - name: stg_product_reviews
+    description: "{{ doc('stg_product_reviews') }}"
+    columns:
+      - name: review_id
+        description: "{{ doc('review_id') }}"
+        data_tests:
+          - not_null
+          - unique
+          - relationships:
+              arguments:
+                to: ref('stg_review')
+                field: review_id
+      - name: p_id
+        description: "{{ doc('p_id') }}"
+        data_tests:
+          - not_null

@@ -1,3 +1,12 @@
 name: 'albert'
 version: '1.0.0'
 profile: 'albert'
+
+models:
+  albert:
+    staging:
+      +materialized: view
+    intermediate:
+      +materialized: view
+    marts:
+      +materialized: table
