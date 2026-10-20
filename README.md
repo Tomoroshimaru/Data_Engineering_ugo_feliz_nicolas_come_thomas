@@ -16,10 +16,11 @@ the end of the course it holds the platform your group defends orally:
 
 | Name | GitHub | Role |
 |---|---|---|
-| | | |
-| | | |
-| | | |
-| | | |
+| Thomas Alaph | [@Tomoroshimaru](https://github.com/Tomoroshimaru) | |
+| Féliz Luberne | [@fefelbrn](https://github.com/fefelbrn) | |
+| Ugo Zanchi | [@ugozchi](https://github.com/ugozchi) | |
+| Nicolas Gilhodes | [@ngilhodes-netizen](https://github.com/ngilhodes-netizen) | |
+| Côme Bonneviale | | |
 
 ## How this repo grows
 
