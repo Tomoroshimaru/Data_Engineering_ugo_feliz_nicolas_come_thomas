@@ -1,0 +1,10 @@
+albert:
+  target: dev
+  outputs:
+    dev:
+      type: bigquery
+      method: oauth
+      project: data-engineering-i2
+      dataset: l05_fl
+      location: europe-west1
+      threads: 4

@@ -1,0 +1,61 @@
+[0m09:34:44.973552 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0xffffa6abfb00>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0xffffa7229bb0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0xffffa6abcb60>]}
+
+
+============================== 09:34:44.980911 | 594b3456-b985-4a9b-b4ad-e1cebda309bd ==============================
+[0m09:34:44.980911 [info ] [MainThread]: Running with dbt=1.12.5
+[0m09:34:44.981471 [debug] [MainThread]: running dbt with arguments {'partial_parse': 'True', 'printer_width': '80', 'maximum_seed_size_mib': '1', 'quiet': 'False', 'static_parser': 'True', 'fail_fast': 'False', 'target_path': 'None', 'warn_error_options': 'WarnErrorOptionsV2(error=[], warn=[], silence=[])', 'warn_error': 'None', 'log_cache_events': 'False', 'indirect_selection': 'eager', 'use_experimental_parser': 'False', 'debug': 'False', 'write_json': 'True', 'no_print': 'None', 'use_colors': 'True', 'profiles_dir': '/usr/app', 'hints_enabled': 'True', 'introspect': 'True', 'version_check': 'True', 'empty': 'None', 'cache_selected_only': 'False', 'log_path': '/usr/app/logs', 'log_format': 'default', 'invocation_command': 'dbt debug', 'send_anonymous_usage_stats': 'True'}
+[0m09:34:44.997363 [info ] [MainThread]: dbt version: 1.12.5
+[0m09:34:44.998618 [info ] [MainThread]: python version: 3.12.14
+[0m09:34:44.999513 [info ] [MainThread]: python path: /usr/local/bin/python3.12
+[0m09:34:45.000300 [info ] [MainThread]: os info: Linux-6.12.76-linuxkit-aarch64-with-glibc2.41
+[0m09:34:46.482717 [info ] [MainThread]: Using profiles dir at /usr/app
+[0m09:34:46.483374 [info ] [MainThread]: Using profiles.yml file at /usr/app/profiles.yml
+[0m09:34:46.484005 [info ] [MainThread]: Using dbt_project.yml file at /usr/app/dbt_project.yml
+[0m09:34:46.484334 [info ] [MainThread]: adapter type: bigquery
+[0m09:34:46.484602 [info ] [MainThread]: adapter version: 1.12.1
+[0m09:34:46.566182 [info ] [MainThread]: Configuration:
+[0m09:34:46.566847 [info ] [MainThread]:   profiles.yml file [[32mOK found and valid[0m]
+[0m09:34:46.567305 [info ] [MainThread]:   dbt_project.yml file [[32mOK found and valid[0m]
+[0m09:34:46.567630 [info ] [MainThread]: Required dependencies:
+[0m09:34:46.568041 [debug] [MainThread]: Executing "git --help"
+[0m09:34:46.572061 [debug] [MainThread]: STDOUT: "b"usage: git [-v | --version] [-h | --help] [-C <path>] [-c <name>=<value>]\n           [--exec-path[=<path>]] [--html-path] [--man-path] [--info-path]\n           [-p | --paginate | -P | --no-pager] [--no-replace-objects] [--no-lazy-fetch]\n           [--no-optional-locks] [--no-advice] [--bare] [--git-dir=<path>]\n           [--work-tree=<path>] [--namespace=<name>] [--config-env=<name>=<envvar>]\n           <command> [<args>]\n\nThese are common Git commands used in various situations:\n\nstart a working area (see also: git help tutorial)\n   clone     Clone a repository into a new directory\n   init      Create an empty Git repository or reinitialize an existing one\n\nwork on the current change (see also: git help everyday)\n   add       Add file contents to the index\n   mv        Move or rename a file, a directory, or a symlink\n   restore   Restore working tree files\n   rm        Remove files from the working tree and from the index\n\nexamine the history and state (see also: git help revisions)\n   bisect    Use binary search to find the commit that introduced a bug\n   diff      Show changes between commits, commit and working tree, etc\n   grep      Print lines matching a pattern\n   log       Show commit logs\n   show      Show various types of objects\n   status    Show the working tree status\n\ngrow, mark and tweak your common history\n   branch    List, create, or delete branches\n   commit    Record changes to the repository\n   merge     Join two or more development histories together\n   rebase    Reapply commits on top of another base tip\n   reset     Reset current HEAD to the specified state\n   switch    Switch branches\n   tag       Create, list, delete or verify a tag object signed with GPG\n\ncollaborate (see also: git help workflows)\n   fetch     Download objects and refs from another repository\n   pull      Fetch from and integrate with another repository or a local branch\n   push      Update remote refs along with associated objects\n\n'git help -a' and 'git help -g' list available subcommands and some\nconcept guides. See 'git help <command>' or 'git help <concept>'\nto read about a specific subcommand or concept.\nSee 'git help git' for an overview of the system.\n""
+[0m09:34:46.572530 [debug] [MainThread]: STDERR: "b''"
+[0m09:34:46.572888 [info ] [MainThread]:  - git [[32mOK found[0m]
+
+[0m09:34:46.573268 [info ] [MainThread]: Connection:
+[0m09:34:46.573962 [info ] [MainThread]:   method: oauth
+[0m09:34:46.574387 [info ] [MainThread]:   database: data-engineering-i2
+[0m09:34:46.574685 [info ] [MainThread]:   execution_project: data-engineering-i2
+[0m09:34:46.575003 [info ] [MainThread]:   schema: l05_fl
+[0m09:34:46.575358 [info ] [MainThread]:   location: europe-west1
+[0m09:34:46.575636 [info ] [MainThread]:   priority: None
+[0m09:34:46.575916 [info ] [MainThread]:   maximum_bytes_billed: None
+[0m09:34:46.576170 [info ] [MainThread]:   reservation: None
+[0m09:34:46.576436 [info ] [MainThread]:   impersonate_service_account: None
+[0m09:34:46.576693 [info ] [MainThread]:   job_retry_deadline_seconds: None
+[0m09:34:46.576965 [info ] [MainThread]:   job_retries: 1
+[0m09:34:46.577323 [info ] [MainThread]:   job_creation_timeout_seconds: None
+[0m09:34:46.577548 [info ] [MainThread]:   job_execution_timeout_seconds: None
+[0m09:34:46.577820 [info ] [MainThread]:   job_link_info_level_log: False
+[0m09:34:46.578058 [info ] [MainThread]:   timeout_seconds: None
+[0m09:34:46.578298 [info ] [MainThread]:   client_id: None
+[0m09:34:46.578823 [info ] [MainThread]:   token_uri: None
+[0m09:34:46.579075 [info ] [MainThread]:   compute_region: None
+[0m09:34:46.579399 [info ] [MainThread]:   dataproc_cluster_name: None
+[0m09:34:46.579698 [info ] [MainThread]:   gcs_bucket: None
+[0m09:34:46.579991 [info ] [MainThread]:   dataproc_batch: None
+[0m09:34:46.580448 [info ] [MainThread]: Registered adapter: bigquery=1.12.1
+[0m09:34:46.649908 [debug] [MainThread]: Acquiring new bigquery connection 'debug'
+[0m09:34:46.650355 [debug] [MainThread]: On debug: select 1 as id
+[0m09:34:46.650687 [debug] [MainThread]: Opening a new connection, currently in state init
+[0m09:34:47.524102 [debug] [MainThread]: BigQuery adapter: https://console.cloud.google.com/bigquery?project=data-engineering-i2&j=bq:europe-west1:cf9fd7a6-d017-4106-8ca9-3801d701bac5&page=queryresults
+[0m09:34:47.716396 [debug] [MainThread]: SQL status: OK in 0.191 seconds
+[0m09:34:47.986901 [info ] [MainThread]:   Connection test: [[32mOK connection ok[0m]
+
+[0m09:34:47.987867 [info ] [MainThread]: [32mAll checks passed![0m
+[0m09:34:47.988933 [debug] [MainThread]: Resource report: {"command_name": "debug", "command_success": true, "command_wall_clock_time": 3.0721297, "process_in_blocks": "58224", "process_kernel_time": 1.007079, "process_mem_max_rss": "228836", "process_out_blocks": "3709", "process_user_time": 3.236673}
+[0m09:34:47.990184 [debug] [MainThread]: Command `dbt debug` succeeded at 09:34:47.989948 after 3.07 seconds
+[0m09:34:47.990753 [debug] [MainThread]: Connection 'debug' was properly closed.
+[0m09:34:47.991421 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0xffffa7229bb0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0xffffa7252060>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0xffffa76fa480>]}
+[0m09:34:47.993453 [debug] [MainThread]: Flushing usage events
+[0m09:34:48.901126 [debug] [MainThread]: An error was encountered while trying to flush usage events
