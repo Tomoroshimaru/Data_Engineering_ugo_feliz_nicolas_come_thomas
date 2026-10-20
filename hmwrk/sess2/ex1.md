@@ -1,4 +1,4 @@
-# Session 2 — Exercise 1: stand up your own bronze bucket
+# Session 3 — Exercise 1: stand up your own bronze bucket
 
 LUBERNE Féliz — project `data-engineering-i2`, bucket `gs://data-engineering-i2-feliz`
 (europe-west1, Standard), pandas 2.2.3, pyarrow 25.0.1.
@@ -14,7 +14,8 @@ screens to click through again.
 
 | File | Size |
 |------|------|
-| `bronze/order_items.csv` | 10,373,925 bytes (10.4 MB) |
+| `bronze/order_items.csv
+` | 10,373,925 bytes (10.4 MB) |
 | `bronze/order_items.parquet` (snappy) | 3,546,873 bytes (3.5 MB) |
 | **Ratio** | **2.9 times smaller** |
 
