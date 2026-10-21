@@ -1,0 +1,15 @@
+version: 2
+
+macros:
+  - name: delete_day
+    description: "{{ doc('delete_day') }}"
+    arguments:
+      - name: model
+        type: string
+        description: "Name of the model's table, in the target dataset."
+      - name: day
+        type: string
+        description: "Day to delete, as YYYY-MM-DD."
+
+  - name: test_sum_matches
+    description: "{{ doc('test_sum_matches') }}"

@@ -1,0 +1,7 @@
+version: 2
+
+analyses:
+  - name: ex2_totals
+    description: "{{ doc('ex2_totals') }}"
+  - name: ex2_product_history
+    description: "{{ doc('ex2_product_history') }}"
