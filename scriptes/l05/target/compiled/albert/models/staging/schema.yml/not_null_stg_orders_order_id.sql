@@ -1,0 +1,11 @@
+
+    
+    
+
+
+
+select order_id
+from `data-engineering-i2`.`l05_fl`.`stg_orders`
+where order_id is null
+
+

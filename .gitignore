@@ -8,6 +8,7 @@ service-account*.json
 
 # Local data
 data/
+legacy_csv/
 *.parquet
 
 # Python
