@@ -1,57 +1,103 @@
 # Session 2 — Exercise 2: a retention and access plan
 
-LUBERNE Féliz — a French luxury jewellery and watchmaking house. Its analytics
-platform runs on Google Cloud: data lands in BigQuery, is modelled with dbt and
-read through Looker (see L01-EX2). This page describes categories of data and
-cites only public rules; no internal policy is quoted.
+LUBERNE Féliz — written as a group, from the analytics team at Cartier. Our
+platform is on Google Cloud: data lands in BigQuery, dbt models it, and Looker,
+Tableau and Power BI read it. We describe categories of data and cite only
+public rules; no internal policy is quoted and no volume is given.
 
 ## 1. Three datasets
 
-| Dataset | What it is | How much | How often it is read |
-|---------|------------|----------|----------------------|
-| **A. Sales transactions** | Every sale from boutiques (point of sale) and the e-shop: order, product, price, store, date, and the client it was sold to. | The largest and fastest-growing dataset in the warehouse. | Daily for the current and previous year (dashboards, year-on-year); older years only for audits. |
-| **B. Web and app logs** | Technical and navigation events streamed from the web platform (hosted on AWS). | High volume, mostly short-lived value. | Heavily in the first days (incidents, traffic analysis), rarely after a month. |
-| **C. Ad-hoc CSV imports** | Spreadsheets sent by business teams and loaded through Airflow, plus the child tables built from them. | Small, but many files. | By the person who asked for them, within days; almost never afterwards. |
+**Sales transactions.** Every sale from the boutiques' point of sale and from
+the e-shop: product, price, boutique, date, and the client. It is the largest
+dataset we hold. The current and previous year are read every day by the
+dashboards; older years are read for audits and long comparisons.
 
-## 2. How long each must be kept, and on whose authority
+**Web and app events.** Navigation and technical events sent by the web team's
+platform on AWS. A lot of it, worth a lot for a few days and very little after
+a month. Our dashboards read it daily; incidents are investigated by the web
+team.
 
-| Dataset | Retention | Source |
-|---------|-----------|--------|
-| **A. Sales** | 10 years after the end of the financial year. Client identity in analytics: 3 years after the client's last purchase, then pseudonymised. | **Law:** French Commercial Code, art. L123-22 (accounting documents and supporting evidence kept 10 years). **Regulator guidance:** CNIL, client data for marketing kept 3 years after the last contact (GDPR art. 5(1)(e), storage limitation). |
-| **B. Logs** | 12 months, then deleted. | **Regulator guidance:** the CNIL recommendation on logging (6 months to 1 year), under GDPR storage limitation, since logs contain IP addresses. |
-| **C. CSV imports** | None defined. | **Nobody knows:** no owner, no rule; they have always been kept because nothing deletes them. I propose 90 days (section 5 explains why I cannot enforce it). |
+**Business CSV imports.** Spreadsheets sent by business teams (targets,
+mappings, one-off lists) for a given subject: HR, marketing, a product launch.
+The analytics engineer (AE) working on that subject loads the file with a
+Python script, turns it into a table and owns that table in BigQuery; the
+business contact who sent it vouches for its content. Small files, but many of
+them. The subject's dashboards read them while the subject is active, then
+almost nobody does.
 
-## 3. Storage-class and lifecycle plan
+## 2. How long each must be kept, and who says so
 
-Raw files are kept in a Cloud Storage bronze bucket; the BigQuery tables
-built from them follow the same calendar with partition expiration.
+Sales must be kept **10 years** after the end of the financial year. That
+comes from the French Commercial Code, article L123-22, which applies to
+accounting documents and the records behind them. The client's identity is a
+different matter: for marketing use, the CNIL's guidance is 3 years after the
+client's last purchase (GDPR, article 5(1)(e), storage limitation). After that
+we would keep the sale but pseudonymise the client in the analytics tables.
 
-| Dataset | At creation | Transitions | Deleted? | Why, by read frequency |
-|---------|-------------|-------------|----------|------------------------|
-| **A. Sales** | Standard | Nearline at 1 year, Archive at 3 years | Yes, at 10 years, unless under legal hold | Read daily in year 1, a few times a year in years 2–3 (comparisons), then only by auditors. |
-| **B. Logs** | Standard | Nearline at 30 days | Yes, at 12 months | Read daily during the first month, occasionally for investigations afterwards. No Coldline or Archive: their minimum storage duration (90 and 365 days) would cost as much as keeping them to deletion. |
-| **C. CSV imports** | Standard | Nearline at 30 days | Yes, at 90 days (proposed) | Read within days of upload, then almost never. |
+Web and app events: **12 months**, then deleted. Logs hold IP addresses, so
+they are personal data, and the CNIL's recommendation on logging is between 6
+months and a year.
 
-## 4. Who reads what, with the narrowest access
+CSV imports: **nobody has decided**. Each file has an owner, but no written rule
+says how long it should live; files and tables are kept because nothing
+deletes them. HR files may also fall under the retention periods of the Labour
+Code, which would make them longer, not shorter. We would set 90 days for the
+raw files once the subject's table is built, and section 5 explains why that is
+hard to apply.
 
-| Dataset | Who | Narrowest access | Person or service |
-|---------|-----|------------------|-------------------|
-| **A. Sales** | Key users (business) | Looker dashboards on the aggregated gold tables; no access to BigQuery itself. | Person, through Looker only |
-| | Looker and dbt | Read-only on the specific datasets they use (`bigquery.dataViewer` on the gold dataset for Looker, on bronze/silver for dbt). | Service |
-| | Data engineers | Read on bronze for maintenance; client identity masked by default. | Person |
-| | Auditors | Time-limited read on archived years, granted on request. | Person, temporary |
-| **B. Logs** | Ingestion pipeline | Write only (`storage.objectCreator`) on the log prefix. | Service |
-| | Web on-call engineer | Read on the log prefix, granted for the incident and then removed. | Person, temporary |
-| **C. CSV imports** | Business requester | Upload only to their own landing prefix; cannot read other teams' files. | Person |
-| | Airflow | Read on the landing prefix, write to BigQuery. | Service |
+## 3. Storage class and lifecycle
 
-## 5. What I cannot do, and why
+Raw files sit in a Cloud Storage bucket and follow the calendar below; the
+BigQuery tables built from them follow it through partition expiry. Each step
+follows how often the data is read.
 
-I cannot apply the 90-day deletion to the CSV imports, because no one owns
-them. A file is uploaded by one business team, loaded by the data team, and
-turned into child tables used by others, so nobody has the authority to say it
-can be deleted, and deleting it without that authority could break a report
-someone still relies on. The data team can propose the rule, but the decision
-has to come from a named business owner for each source, and that ownership
-does not exist yet. Until it does, these files are kept forever by default,
-including any personal data they contain.
+| Dataset | At creation | Then | Deleted |
+|---|---|---|---|
+| Sales | Standard: read every day | Nearline at 1 year (a few reads a year), Archive at 3 years (audits only) | At 10 years, unless under legal hold |
+| Web and app events | Standard: read daily for a month | Nearline at 30 days | At 12 months |
+| CSV imports | Standard: read while the subject is active | Nearline at 30 days | Raw file at 90 days (proposed); the table follows its subject |
+
+We left Coldline and Archive out for the events on purpose. Their minimum
+storage durations (90 and 365 days) mean an object moved there and deleted at
+12 months would cost about as much as if it had stayed where it was.
+
+## 4. Who reads what
+
+Key users never touch BigQuery. They read sales through Looker, or Tableau and
+Power BI for the teams still on them, and only on aggregated tables with the
+client masked. The BI tools, dbt and our ingestion scripts each run as their
+own service account with read access to the datasets they need, nothing wider,
+and the bindings are written in Terraform. We, the data engineers, can read
+bronze for maintenance, with client identity masked by default. Auditors get
+time-limited read access to archived years when they ask.
+
+The web events are written by an ingestion service account that can only
+create objects, not read or delete them. The web on-call engineer gets read
+access for the length of an incident.
+
+For the CSV imports, access follows the subject. The business contact uploads
+to that subject's folder and cannot see other subjects' files. The AE who owns
+the subject reads the folder and writes the table, and the dashboards of that
+subject read the table, nothing else. An HR file should never be readable by
+the marketing AE.
+
+So people reach data through a BI tool or a temporary grant; services reach it
+directly.
+
+## 5. What we cannot do
+
+We cannot easily apply a retention rule to the CSV imports, because their
+ownership is split in two and it follows subjects, not data. The AE on a
+subject owns the table; the business contact vouches for what is in it. A
+retention period is a decision about the content, so it belongs to the business
+contact, who is not a data person and has no reason to think about it. And
+subjects end: the AE moves to the next topic, or leaves at the end of an
+apprenticeship, while the table stays in BigQuery with an owner who no longer
+looks at it. Deleting it then means finding out who still reads it, which
+nobody has time to do.
+
+So these files and tables are kept for as long as nothing deletes them,
+including whatever personal data they hold. The fix is not technical: when a
+subject starts, the AE and the business contact should agree a retention
+period and write it on the table as a label, so that an expiry can be set the
+day the table is created.

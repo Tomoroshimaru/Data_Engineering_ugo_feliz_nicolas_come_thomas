@@ -1,0 +1,11 @@
+# Secrets never enter the build context, so they can never reach an image.
+.env
+.env.*
+*-key.json
+*credentials*.json
+
+# Output and local clutter.
+out/
+*.parquet
+__pycache__/
+.DS_Store

@@ -1,32 +1,65 @@
 # Session 5 — Exercise 2: critique a generated dbt model
 
-LUBERNE Féliz. I re-ran the generated SQL on the same bronze (`l04_fl`) and got
-its exact figures: 356,981 rows, 29,887,618 units, €700,515,495.02.
-B0BM4GX6TT on 2024-10-07: 48 units really sold × 376 reviews = 18,048.
+LUBERNE Féliz — written as a group. We added the generated model to our dbt
+project as it was (`scriptes/l05/models/marts/fct_daily_demand_gen.sql`) and
+built it on our lesson 4 bronze. We got the brief's output line for line
+(`FAIL 39159`, `Done. PASS=3 ERROR=1`) and its exact figures: 356,981 rows,
+29,887,618 units, €700,515,495.02. The row the brief quotes checks out: B0BM4GX6TT sold
+48 units on 2024-10-07 and has 376 reviews, and 48 × 376 = 18,048.
 
 ## 1. The defects, ranked by what they would cost
 
-| # | Defect | Line | Wrong today? | Cost if shipped |
-|---|--------|------|--------------|-----------------|
-| **1** | **`unique_key='p_id'` on an incremental model whose grain is (product, day).** Each incremental run is a `MERGE ... ON p_id`: a product sold on the new day matches **every** historical row of that product, and all of them are overwritten with the new day's date and figures. | `config(... unique_key='p_id')` | **No.** The first run is a full `CREATE TABLE`, so today's numbers are right. | The highest. From the first daily run, history is rewritten in place, product by product, with no error and no failed run. In three weeks the table is wrong for every product that sold since, and nothing says so. The only signal is a test that was already red on day one. |
-| **2** | **Fan-out on the reviews.** Order lines are joined to every review of their product before aggregating, so each line is counted once per review. | The two `LEFT JOIN`s on `product_reviews` and `review` | Yes: revenue ×17.9, units ×21.6. | Very high, but **loud**: €700 million against €39 million is caught by the first person who compares with finance. |
-| **3** | **`review_count` is multiplied** by the number of order lines of that product that day (wrong on 47,914 rows). `avg_rating` happens to be right, because every review is repeated the same number of times. | `COUNT(r.review_id)`, same joins | Yes. | Medium: a misleading column, and the correct-looking `avg_rating` beside it makes the table look trustworthy. |
-| **4** | **Strict `>` on the last loaded date.** If a run happens before a day is complete, or an order arrives late with an earlier date, those rows are never loaded. | `WHERE o.order_date > (SELECT MAX(order_date) FROM {{ this }})` | No. | Medium and silent, but bounded: it loses the late rows of the boundary day, not the history. |
-| 5 | **A test that contradicts the declared grain.** The comment says one row per product per day; the test says one row per product. It fails on correct data (39,159 products appear on more than one day), so the team learns to ignore a red test, which is exactly what hides defect 1. | `unique` on `p_id` in `_gen.yml` | n/a | Indirect but real: it trains people to ignore failures. |
-| 6 | **`source()` instead of `ref()`.** The model reads bronze directly, skipping the staging models (no lineage through them, and no cleaning). | the four `source()` calls | No. | Low today, a maintenance cost later. |
+| # | Defect | Where | Wrong today? |
+|---|--------|-------|--------------|
+| 1 | `unique_key='p_id'` on an incremental model whose grain is product and day | `config(...)` | No |
+| 2 | The reviews are joined before aggregating, so each order line is counted once per review: revenue ×17.9, units ×21.6 | the two `LEFT JOIN`s | Yes |
+| 3 | `review_count` is multiplied by the product's order lines that day (wrong on 47,914 rows) | `COUNT(r.review_id)` | Yes |
+| 4 | The incremental filter uses a strict `>` on the last loaded date | the `is_incremental()` block | No |
+| 5 | The `unique` test on `p_id` contradicts the grain written in the comment | `_gen.yml` | Not a number |
+| 6 | It reads `source()` directly instead of the staging models | the four `source()` calls | No |
 
-**Why defect 1 ranks first.** Defects 2 and 3 are wrong today and big enough to
-be noticed. Defect 1 is right on the day it is reviewed and approved, then
-degrades a little more every run, on a table nobody re-checks once it shipped.
-A loud error costs a day; a silent one costs every decision taken on the table
-until someone reconciles it.
+We put the incremental key first because it is the only defect that is right
+on the day someone reviews it. The first build is a plain `CREATE TABLE`, so
+every number is correct. From the next run on, dbt runs a `MERGE ... ON p_id`:
+a product sold on the new day matches every row of that product's history, and
+all of them are overwritten with the new day's figures. No run fails and no
+error is raised. Three weeks later, every product sold since has lost its
+history, on a table nobody looks at again once it has shipped.
+
+We watched it happen. We deleted 2026-09-14 from the built table, as if that
+day had not been loaded yet, and ran dbt again without `--full-refresh`. The
+run reported `Done. PASS=2 ERROR=0` and a `MERGE` of 24.6k rows to reload a
+single day. Product B0BM4GX6TT had 736 rows over 736 days before; it now had
+735 rows, all dated 2026-09-14, totalling 1,105,440 units. That day it really
+sold 4 units: multiplied by its 376 reviews (defect 2), then copied onto all
+735 rows of its history (defect 1). The reloaded day was not even inserted,
+because it matched existing rows. Our rewrite, run the same way, kept its 736
+days and its true 4,456 units, and merged only the 1.7k rows of its three-day
+look-back.
+
+The fan-out (2) costs more in raw numbers, but it is loud. €700 million against
+€39 million gets caught by the first person who compares it with finance.
+`review_count` (3) is wrong for the same reason; `avg_rating` happens to be
+right, because each review is repeated the same number of times, and that makes
+the table look more trustworthy than it is. The strict `>` (4) is silent too,
+but it only loses the late rows of the last loaded day. The wrong test (5)
+fails on correct data, which teaches the team to ignore a red test, the very
+habit that hides defect 1. Reading `source()` (6) costs nothing today and
+lineage later.
 
 ## 2. The tests
 
-- **`unique` on `p_id` failed (FAIL 39159).** It caught the contradiction between the test and the grain, defect 5: products sell on more than one day. It caught no data problem.
-- **`not_null` on `p_id` and on `units_sold` passed**, and could not catch anything relevant: a doubled number is not null.
-- **Invisible even with every test green:** the fan-out (2 and 3) and the incremental filter (4). Aggregation collapses the duplicates back to one row per product and day, so even a correct grain test passes on a table 18 times too large.
-- **The one test I would add, for defect 1:** the real grain. After the first incremental run, the merge leaves several rows with the same `(p_id, order_date)`, and this fails:
+The `unique` test on `p_id` failed with 39,159 rows. It caught defect 5, the
+test itself: products sell on more than one day, so `p_id` was never unique. It
+caught no problem in the data. The two `not_null` tests passed and could not
+have caught anything, since a number multiplied by 18 is still not null.
+
+Even with every test green, the fan-out and the incremental filter would stay
+invisible. The `GROUP BY` folds the duplicated lines back into one row per
+product and day, so a correct grain test passes on a table 18 times too large.
+
+The test we would add is the real grain. After the first incremental run, the
+merge leaves several rows with the same product and day, and this fails:
 
 ```yaml
 models:
@@ -37,23 +70,24 @@ models:
             combination_of_columns: [p_id, order_date]
 ```
 
-For defect 2, the second test I would add is a reconciliation (a singular test
-that fails if `SUM(units)` in the mart differs from `SUM(qty)` in
-`stg_order_items`): no grain test can see a fan-out that has been aggregated
-away.
+For the fan-out we added a second test, `sum_matches` in
+`scriptes/l05/tests/generic/`, which fails when the mart's total units or
+revenue differ from the order lines underneath. No grain test can see a fan-out
+that has already been aggregated away.
 
 ## 3. The rewrite
 
-The reviews are aggregated to one row per product in `int_product_ratings`
-before being joined, because the problem is that a review is at a different
-grain from an order line; a `WHERE` clause can only keep or drop rows, so it
-could keep one arbitrary review per product or lose products, but never turn
-many reviews into one attribute of the product.
+We aggregated the reviews to one row per product in `int_product_ratings`
+before joining them. A review and an order line are at different grains, and a
+`WHERE` clause can only keep or drop rows: it could keep one arbitrary review
+per product, or lose products, but it could never turn many reviews into one
+attribute of the product.
 
-Staging (`stg_orders`, `stg_order_items`, `stg_review`, `stg_product_reviews`)
-is the one from exercise 1.
+The staging models are the ones from exercise 1. The rewrite is in our project
+as `fct_daily_demand_fixed`. Built on the same data, it passes its six tests and
+lands on the truth to the cent: 356,981 rows, 1,386,640 units, €39,199,900.62.
 
-**`models/intermediate/int_order_items.sql`**
+`models/intermediate/int_order_items.sql`
 
 ```sql
 SELECT i.order_id, i.p_id, i.qty, i.price_at_purchase, o.order_date
@@ -61,7 +95,7 @@ FROM {{ ref('stg_order_items') }} AS i
 JOIN {{ ref('stg_orders') }} AS o USING (order_id)
 ```
 
-**`models/intermediate/int_product_ratings.sql`**
+`models/intermediate/int_product_ratings.sql`
 
 ```sql
 -- One row per product.
@@ -71,7 +105,7 @@ JOIN {{ ref('stg_review') }} AS r USING (review_id)
 GROUP BY pr.p_id
 ```
 
-**`models/marts/fct_daily_demand.sql`**
+`models/marts/fct_daily_demand.sql`
 
 ```sql
 {{
@@ -102,25 +136,23 @@ FROM daily AS d
 LEFT JOIN {{ ref('int_product_ratings') }} AS r USING (p_id)
 ```
 
-## 4. What this tells you about generated code
+## 4. What it tells us about generated code
 
-The model was syntactically perfect and semantically wrong, and every check it
-went through checks syntax: it compiled, it built, and its tests ran. Nothing in
-that chain knows that this company made €39 million. The assistant wrote the
-grain in a comment and a contradicting test because both are plausible text
-produced separately; nothing executes the comment against the data, so nothing
-can notice that they disagree.
+Every check this model went through was a check on syntax. It compiled, it
+built and its tests ran, and none of those steps knew the company made €39
+million. The assistant wrote the grain in a comment and a test that disagreed
+with it, because both were plausible text written separately; nothing ran the
+comment against the data.
 
-The cheapest check that catches this whole class of error is a
-**reconciliation against a number someone outside the code is accountable for**:
-total revenue and total units in the mart, compared with the same totals one
-layer down and with the figure finance publishes. It is one query, and it
-catches every fan-out regardless of how the join was written. On a real project
-that number is the finance close (the general ledger), and the person who knows
-it is the finance controller, not the data team. The data team's job is to ask
-for it before the first model ships.
+The cheapest check we know against this kind of error is to reconcile the
+total. Compare total revenue and units in the mart with the same totals one
+layer down, and once with the figure finance publishes. It is one query, and it
+catches every fan-out whatever the join looks like. In a real company that
+figure comes from the finance close, and the person who knows it is the
+finance controller, not us. Asking them for it before the first model ships is
+part of our job.
 
-For a review checklist, two lines:
+Two lines we would put in a review checklist:
 
-1. **A model that declares a grain tests that exact grain** with `unique_combination_of_columns` on the columns named in its description, and the reviewer checks that the two match. If it is incremental, its `unique_key` equals that grain.
-2. **A model that sums money or units has a reconciliation test** against the layer below, and its total has been compared once, by a person, with a figure from outside the data team.
+1. If a model states a grain, it tests that exact grain, and the reviewer checks the two match. If it is incremental, its `unique_key` is that grain.
+2. If a model sums money or units, it has a test that reconciles its total with the layer below, and someone has compared that total once with a figure from outside the data team.
