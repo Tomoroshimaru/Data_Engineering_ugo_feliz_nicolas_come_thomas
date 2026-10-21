@@ -11,6 +11,11 @@ data/
 legacy_csv/
 *.parquet
 
+# Personal coursework lives on the hmwrk branch, never here
+scriptes/
+scriptes_results/
+hmwrk/
+
 # Python
 __pycache__/
 *.py[cod]
