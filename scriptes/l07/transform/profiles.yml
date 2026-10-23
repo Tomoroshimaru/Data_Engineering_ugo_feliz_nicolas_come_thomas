@@ -1,0 +1,12 @@
+albert:
+  target: dev
+  outputs:
+    dev:
+      type: bigquery
+      method: oauth
+      project: data-engineering-i2
+      dataset: l07_fl
+      location: europe-west1
+      threads: 4
+      job_execution_timeout_seconds: 300
+      priority: interactive

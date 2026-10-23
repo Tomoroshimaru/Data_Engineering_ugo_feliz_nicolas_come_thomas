@@ -1,0 +1,13 @@
+name: 'albert_l07'
+version: '1.0.0'
+profile: 'albert'
+
+model-paths: ["models"]
+test-paths: ["tests"]
+
+models:
+  albert_l07:
+    staging:
+      +materialized: view
+    marts:
+      +materialized: table

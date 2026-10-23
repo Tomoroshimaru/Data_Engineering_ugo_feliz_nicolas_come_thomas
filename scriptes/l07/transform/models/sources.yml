@@ -1,0 +1,10 @@
+version: 2
+
+sources:
+  - name: marketplace
+    description: "Bronze. The DAG writes orders_raw; order_items_raw came from lesson 4."
+    database: data-engineering-i2
+    schema: l07_fl
+    tables:
+      - name: orders_raw
+      - name: order_items_raw

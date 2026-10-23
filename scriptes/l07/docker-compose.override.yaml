@@ -1,0 +1,55 @@
+# Compose merges this file on top of docker-compose.yaml. The service names
+# below must match the ones in that file exactly, or you create new services
+# instead of changing the existing ones.
+services:
+
+  # The worker is what actually runs your tasks, so it needs both additions.
+  airflow-worker:
+    build: .                       # build from the Dockerfile next to this file
+    image: albert-airflow:3.3.2     # ...and call the result this
+    environment:                    # MERGED into the base file's environment,
+      HOST_DIR: ${HOST_DIR}         # not a replacement for it
+      GCLOUD_DIR: ${GCLOUD_DIR}
+    volumes:
+      # Hand the container the host's Docker socket. This is what lets a task
+      # start another container. Without it your DAG parses, the UI looks
+      # healthy, and every task fails the moment it tries to run an image.
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  # `airflow dags test` runs a task inside whichever container you exec into,
+  # so the scheduler gets the socket too — otherwise testing a DAG by hand
+  # fails while the same DAG works when scheduled.
+  airflow-scheduler:
+    build: .
+    image: albert-airflow:3.3.2
+    environment:
+      HOST_DIR: ${HOST_DIR}
+      GCLOUD_DIR: ${GCLOUD_DIR}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  # The rest only need the image and the variables: they never run a task.
+  airflow-dag-processor:
+    build: .
+    image: albert-airflow:3.3.2
+    environment:
+      HOST_DIR: ${HOST_DIR}
+      GCLOUD_DIR: ${GCLOUD_DIR}
+
+  airflow-apiserver:
+    build: .
+    image: albert-airflow:3.3.2
+    environment:
+      HOST_DIR: ${HOST_DIR}
+      GCLOUD_DIR: ${GCLOUD_DIR}
+
+  airflow-triggerer:
+    build: .
+    image: albert-airflow:3.3.2
+    environment:
+      HOST_DIR: ${HOST_DIR}
+      GCLOUD_DIR: ${GCLOUD_DIR}
+
+  airflow-init:
+    build: .
+    image: albert-airflow:3.3.2

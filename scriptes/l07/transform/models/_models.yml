@@ -1,0 +1,29 @@
+version: 2
+
+models:
+  - name: stg_orders
+    description: "{{ doc('stg_orders') }}"
+    columns:
+      - name: order_id
+        description: "One row per order. The DAG's job is to keep it that way."
+        data_tests:
+          - unique
+          - not_null
+
+  - name: stg_order_items
+    description: "{{ doc('stg_order_items') }}"
+    columns:
+      - name: order_id
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('stg_orders')
+              field: order_id
+
+  - name: fct_daily_orders
+    description: "{{ doc('fct_daily_orders') }}"
+    columns:
+      - name: order_date
+        data_tests:
+          - unique
+          - not_null

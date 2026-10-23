@@ -1,0 +1,9 @@
+# D1, D6: secrets and local clutter never enter the build context.
+**/.env
+**/.env.*
+**/*-key.json
+**/__pycache__
+**/*.pyc
+**/.DS_Store
+**/.git
+Dockerfile*
