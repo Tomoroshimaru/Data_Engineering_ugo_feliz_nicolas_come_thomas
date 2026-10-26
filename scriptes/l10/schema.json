@@ -1,0 +1,11 @@
+[
+  { "name": "address_id",     "type": "INTEGER" },
+  { "name": "street_address", "type": "STRING",
+    "policyTags": { "names": ["projects/data-engineering-i2/locations/europe-west1/taxonomies/7165429053100299609/policyTags/4004979004607054310"] } },
+  { "name": "city",           "type": "STRING" },
+  { "name": "state",          "type": "STRING" },
+  { "name": "zip",            "type": "STRING" },
+  { "name": "country",        "type": "STRING" },
+  { "name": "phone",          "type": "INTEGER",
+    "policyTags": { "names": ["projects/data-engineering-i2/locations/europe-west1/taxonomies/7165429053100299609/policyTags/4004979004607054310"] } }
+]

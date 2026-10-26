@@ -1,0 +1,9 @@
+[
+  { "name": "address_id",     "type": "INTEGER" },
+  { "name": "street_address", "type": "STRING",  "policyTags": {} },
+  { "name": "city",           "type": "STRING" },
+  { "name": "state",          "type": "STRING" },
+  { "name": "zip",            "type": "STRING" },
+  { "name": "country",        "type": "STRING" },
+  { "name": "phone",          "type": "INTEGER", "policyTags": {} }
+]
