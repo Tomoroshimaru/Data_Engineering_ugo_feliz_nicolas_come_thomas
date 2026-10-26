@@ -1,0 +1,14 @@
+[
+  { "name": "int64_field_0",  "type": "INTEGER", "mode": "NULLABLE" },
+  { "name": "address_id",     "type": "INTEGER", "mode": "NULLABLE" },
+  { "name": "street_address", "type": "STRING",  "mode": "NULLABLE",
+    "policyTags": { "names": ["projects/data-engineering-i2/locations/europe-west1/taxonomies/6841515207821272684/policyTags/554809912310576901"] } },
+  { "name": "city",           "type": "STRING",  "mode": "NULLABLE",
+    "policyTags": { "names": ["projects/data-engineering-i2/locations/europe-west1/taxonomies/6841515207821272684/policyTags/6699549887614611263"] } },
+  { "name": "state",          "type": "STRING",  "mode": "NULLABLE" },
+  { "name": "zip",            "type": "STRING",  "mode": "NULLABLE",
+    "policyTags": { "names": ["projects/data-engineering-i2/locations/europe-west1/taxonomies/6841515207821272684/policyTags/6699549887614611263"] } },
+  { "name": "country",        "type": "STRING",  "mode": "NULLABLE" },
+  { "name": "phone",          "type": "INTEGER", "mode": "NULLABLE",
+    "policyTags": { "names": ["projects/data-engineering-i2/locations/europe-west1/taxonomies/6841515207821272684/policyTags/554809912310576901"] } }
+]
