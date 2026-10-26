@@ -79,7 +79,7 @@ The line that fixed it: `MERGE l07_ex_fl.product_raw t USING l07_ex_fl.product_s
 
 | | Rows in `product_raw` |
 |---|---|
-| Our prediction, written before | **[TO FILL IN: the number we predicted before running]** |
+| Our prediction, written before | 128,577 (three runs × 42,859: we expected each day to add the table again) |
 | What actually happened | 42,859 (and 409,609 in `order_items_raw`) |
 
 The dry run listed three runs, 2026-10-10 to 2026-10-12. Each one extracted the whole table again, and the merge matched every row it already had, so three full extracts added nothing. We ran it with `--max-active-runs 1` on purpose: in the demo, a back-fill whose days ran in parallel failed, because every run writes the same `out/orders.parquet` and one run's extract overwrote the file while another run's load was reading it. The merge makes a run safe to repeat; it does not make two runs safe at the same time. A file name per interval (`product_{{ ds }}.parquet`) would.
