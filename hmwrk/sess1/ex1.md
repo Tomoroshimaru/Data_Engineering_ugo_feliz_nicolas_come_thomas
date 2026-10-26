@@ -2,8 +2,7 @@
 
 ## The brief
 
-Customers use the web shop, which writes to one PostgreSQL database. Analysts
-query that database directly, and a nightly CSV export feeds spreadsheets.
+Customers use the web shop, which writes to one PostgreSQL database. Analysts query that database directly, and a nightly CSV export feeds spreadsheets.
 
 What we know, from the lecture and the diagram:
 
@@ -25,9 +24,7 @@ What we know, from the lecture and the diagram:
 
 ## 2. The classification
 
-None of the four. It is an operational database used for analytics: it does not
-integrate several sources, it keeps no history, and its model is built to record
-orders rather than to aggregate them.
+None of the four. It is an operational database used for analytics: it does not integrate several sources, it keeps no history, and its model is built to record orders rather than to aggregate them.
 
 ## 3. Four problems, with evidence
 
@@ -38,14 +35,11 @@ orders rather than to aggregate them.
 | 3 | No history | The database holds only the current state, so last March's price is gone. |
 | 4 | Sensitive data beside analytical data | Saved cards and passwords sit in the tables the analysts query. |
 
-Two more that the brief also supports: reporting is manual (a nightly CSV opened
-by hand), and nothing exists for the ML team (daily demand is not computed
-anywhere).
+Two more that the brief also supports: reporting is manual (a nightly CSV opened by hand), and nothing exists for the ML team (daily demand is not computed anywhere).
 
 ## 4. The target architecture
 
-**Choice:** a two-tier architecture — object storage for the raw files, plus a
-warehouse for the modelled layers — organised bronze, silver, gold.
+**Choice:** a two-tier architecture — object storage for the raw files, plus a warehouse for the modelled layers — organised bronze, silver, gold.
 
 **Justification, from the decision frame:**
 
@@ -90,8 +84,7 @@ For "units sold per product, per country, per day":
 - **Facts:** units sold, revenue.
 - **Dimensions:** product (with its category), country, date.
 
-The seller cannot be a dimension at this grain: an order line does not record
-which seller sold the product.
+The seller cannot be a dimension at this grain: an order line does not record which seller sold the product.
 
 ## Summary in five sentences
 

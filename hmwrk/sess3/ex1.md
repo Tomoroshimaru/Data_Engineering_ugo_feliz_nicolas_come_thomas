@@ -1,8 +1,6 @@
 # Session 3 — Exercise 1: three ways to extract, and what each one misses
 
-LUBERNE Féliz — route 1 (Airbyte on my machine, abctl). Company stack:
-albert-marketplace (PostgreSQL 17, Kafka), with its load generator running
-throughout.
+LUBERNE Féliz — route 1 (Airbyte on my machine, abctl). Company stack: albert-marketplace (PostgreSQL 17, Kafka), with its load generator running throughout.
 
 ## The table
 
@@ -24,29 +22,15 @@ throughout.
 |---|---|---|---|
 | 11 | 2,200 | 2,000 | **200** |
 
-I killed the consumer once, during the 20-second pause after a 200-row file
-was written and before its offset was committed. On restart the consumer
-group resumed from the last committed offset and read those 200 events again:
-one killed flush gives back exactly one batch.
+I killed the consumer once, during the 20-second pause after a 200-row file was written and before its offset was committed. On restart the consumer group resumed from the last committed offset and read those 200 events again: one killed flush gives back exactly one batch.
 
-With the 20-second pause, a new file appeared roughly every 16 to 22 seconds.
-All files landed in `dt=2026-09-15`, the date of the events, not the day they
-were read.
+With the 20-second pause, a new file appeared roughly every 16 to 22 seconds. All files landed in `dt=2026-09-15`, the date of the events, not the day they were read.
 
 ## Step B: what a cursor would have missed
 
-Of my three changes to product `EX1FL` (insert at 21.98, price corrected to
-24.50, delete), a cursor on a date column would have found only the insert.
-The price correction moves no cursor column, and the delete leaves no row to
-find; the write-ahead log has all three, because it records what the database
-did rather than what the table says now. The cost to the business: the
-warehouse keeps reporting a price nobody was charged and a product that no
-longer exists, and nothing raises an error, so it is found by reconciliation
-weeks later, if at all.
+Of my three changes to product `EX1FL` (insert at 21.98, price corrected to 24.50, delete), a cursor on a date column would have found only the insert. The price correction moves no cursor column, and the delete leaves no row to find; the write-ahead log has all three, because it records what the database did rather than what the table says now. The cost to the business: the warehouse keeps reporting a price nobody was charged and a product that no longer exists, and nothing raises an error, so it is found by reconciliation weeks later, if at all.
 
-The slot also showed what it costs to forget one: with nobody reading it, the
-WAL it retained grew from 343 kB to 796 kB in a few minutes, because the load
-generator keeps writing. I dropped it.
+The slot also showed what it costs to forget one: with nobody reading it, the WAL it retained grew from 343 kB to 796 kB in a few minutes, because the load generator keeps writing. I dropped it.
 
 ## Step C: what moved, sync by sync
 
@@ -60,22 +44,10 @@ All on table `product` (42,858 rows), cursor `p_id`:
 | Incremental | inserted `ZZZFL` | **2** | `ZZZFL` and `B0CHXWTSM6` again |
 | Incremental | price of `0124784577` set to 99.99 | **1** | `ZZZFL` only, the new boundary; **the new price is not there** |
 
-The record count alone is misleading: after the update it shows one record,
-which looks like a change was captured. Opening the output shows that the
-record is the boundary row and the corrected price never left the source.
+The record count alone is misleading: after the update it shows one record, which looks like a change was captured. Opening the output shows that the record is the boundary row and the corrected price never left the source.
 
 ## Deviation from the route, and the grant
 
-The GCS destination needs an HMAC key on a service account with access to my
-bucket. My account can neither create service accounts nor list HMAC keys in
-the project, so I could not set it up. I used a PostgreSQL destination instead
-(a separate `airbyte_dest_sess3` database on the same server), which shows the
-same cursor behaviour row by row.
+The GCS destination needs an HMAC key on a service account with access to my bucket. My account can neither create service accounts nor list HMAC keys in the project, so I could not set it up. I used a PostgreSQL destination instead (a separate `airbyte_dest_sess3` database on the same server), which shows the same cursor behaviour row by row.
 
-So nothing was granted to anyone outside my machine. One grant still deserves
-a line: the Airbyte source holds the `postgres` superuser password, far more
-than a read-only extraction needs. In a real deployment it should be a
-dedicated user with `SELECT` on the extracted tables only, revoked by dropping
-that user or deleting the source in Airbyte. Excluding `pwd`, `card_no` and
-`cvv` also left `email` and `phone` in the copy of `customer`: deselecting
-credentials is not the same as excluding personal data.
+So nothing was granted to anyone outside my machine. One grant still deserves a line: the Airbyte source holds the `postgres` superuser password, far more than a read-only extraction needs. In a real deployment it should be a dedicated user with `SELECT` on the extracted tables only, revoked by dropping that user or deleting the source in Airbyte. Excluding `pwd`, `card_no` and `cvv` also left `email` and `phone` in the copy of `customer`: deselecting credentials is not the same as excluding personal data.
