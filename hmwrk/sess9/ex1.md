@@ -123,5 +123,7 @@ hand still belongs to nobody on the bill. The state bucket also holds 10 objects
 for one state file, because versioning keeps every old version and no rule
 deletes them; small, but it grows with every apply.
 
-The group's `docs/costs.md` belongs to the project and lives on the group
-branch; this ledger covers our own resources.
+`docs/costs.md` now matches reality: we added an L09 section with one row per
+resource, each with its price and the date we measured it (23 and 26 October).
+One more thing it shows: the group warehouse's 8 external tables read the CSVs
+in our personal bucket, not the group's, so it cannot be rebuilt without it.
